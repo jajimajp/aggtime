@@ -1,0 +1,35 @@
+#!/usr/bin/env zx
+const lines = (await stdin())
+                .split('\n')
+                .filter(i => i !== '')
+                .filter(i => !i.match(/^[#|\/\/].*$/g))
+
+const regExp = [
+  '^(\\d+):(\\d+)',
+  '^(\\d+)h(\\d+)min',
+  '^\\d+/\\d+\\s+(\\d+):(\\d+)',
+  '^\\d+/\\d+\\s+(\\d+)h(\\d+)min',
+].map(i => new RegExp(i))
+ .find(i => lines.every(l => l.match(i)))
+
+if (!regExp) { console.error('Failed to parse input.'); process.exit(1) }
+
+const getHM = (s, regExp) => {
+  const match = regExp.exec(s)
+  if (match.length !== 3) {
+    console.error('Invalid RegExp or inputs.')
+    process.exit(1)
+  } else {
+    const [hours, minutes] = [Number(match[1]), Number(match[2])]
+    return [hours, minutes]
+  }
+}
+
+const totalMinutes = lines.reduce((sum, li) => {
+  const [h, m] = getHM(li, regExp)
+  return sum + 60 * h + m
+}, 0)
+const hours = Math.floor(totalMinutes / 60)
+const minutes = totalMinutes - 60 * hours
+
+console.log(`total: ${totalMinutes}min (= ${hours}h${minutes}min)`)
